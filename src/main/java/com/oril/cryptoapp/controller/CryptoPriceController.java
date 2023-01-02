@@ -2,6 +2,7 @@ package com.oril.cryptoapp.controller;
 
 import com.oril.cryptoapp.entity.response.CurrencyPriceRS;
 import com.oril.cryptoapp.service.CurrencyInfoService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,5 +39,11 @@ public class CryptoPriceController {
                                                                  @RequestParam(value = "size", required = false, defaultValue = "${pagination.size}") int pageSize) {
         return ResponseEntity.ok(currencyInfoService.getAllByCurrency(currencyName, pageNumber, pageSize));
     }
+
+    @GetMapping("/cryptocurrencies/csv")
+    public void exportCurrencyToCSV(HttpServletResponse response) throws IOException {
+        currencyInfoService.exportToCSV(response);
+    }
+
 
 }

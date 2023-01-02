@@ -2,6 +2,7 @@ package com.oril.cryptoapp.service;
 
 import com.oril.cryptoapp.entity.api.CurrencyInfo;
 import com.oril.cryptoapp.entity.response.CurrencyPriceRS;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,4 +16,6 @@ public interface CurrencyInfoService {
     CurrencyPriceRS getMinCurrencyPrice(String currency);
 
     List<CurrencyPriceRS> getAllByCurrency(String currency, int pageNumber, int pageSize);
+
+    void exportToCSV(HttpServletResponse response) throws IOException;
 }

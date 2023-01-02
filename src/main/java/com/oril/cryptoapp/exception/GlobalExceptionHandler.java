@@ -21,4 +21,15 @@ public class GlobalExceptionHandler {
                 .timestamp(now())
                 .build();
     }
+
+    @ExceptionHandler(PaginationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlePaginationException(PaginationException paginationException) {
+        return ErrorResponse
+                .builder()
+                .message(paginationException.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
+                .timestamp(now())
+                .build();
+    }
 }

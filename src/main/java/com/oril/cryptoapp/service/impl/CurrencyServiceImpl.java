@@ -2,11 +2,16 @@ package com.oril.cryptoapp.service.impl;
 
 import com.oril.cryptoapp.api.TokenPriceApi;
 import com.oril.cryptoapp.entity.api.CurrencyInfo;
+import com.oril.cryptoapp.entity.request.CsvExportRq;
 import com.oril.cryptoapp.entity.response.CurrencyPriceRS;
+import com.oril.cryptoapp.enums.Currency;
 import com.oril.cryptoapp.exception.CurrencyNotFoundException;
 import com.oril.cryptoapp.repository.CurrencyInfoRepository;
 import com.oril.cryptoapp.service.CurrencyInfoService;
+import com.oril.cryptoapp.util.CsvExporter;
+import com.oril.cryptoapp.validation.PaginationValidator;
 import com.oril.cryptoapp.validation.RequestCurrencyValidator;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,6 +32,7 @@ public class CurrencyServiceImpl implements CurrencyInfoService {
     private final CurrencyInfoRepository currencyInfoRepository;
     private final TokenPriceApi tokenPriceApi;
     private final RequestCurrencyValidator currencyValidator;
+    private final PaginationValidator paginationValidator;
 
     private final static String USD_PAIR = "%s:USD";
     private final static String SORTING_FIELD = "last";
@@ -77,6 +84,8 @@ public class CurrencyServiceImpl implements CurrencyInfoService {
 
     @Override
     public List<CurrencyPriceRS> getAllByCurrency(String currency, int pageNumber, int pageSize) {
+        paginationValidator.validatePaginationParam(pageNumber, pageSize);
+
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(SORTING_FIELD).descending());
         var currencyList = currencyInfoRepository.findAllByPair(String.format(USD_PAIR, currency), pageable);
 
@@ -87,6 +96,19 @@ public class CurrencyServiceImpl implements CurrencyInfoService {
                         .pairs(curr.getPair())
                         .build())
                 .toList();
+    }
+
+    @Override
+    public void exportToCSV(HttpServletResponse response) throws IOException {
+        var currencyList = Arrays.stream(Currency.values()).toList();
+
+        var currencyListForCSV = currencyList.stream().map(currency -> CsvExportRq.builder()
+                .maxPrice(getMaxCurrencyPrice(currency.name()).getPrice())
+                .minPrice(getMinCurrencyPrice(currency.name()).getPrice())
+                .name(currency.name())
+                .build()).toList();
+
+        new CsvExporter().export(currencyListForCSV, response);
     }
 
 }
