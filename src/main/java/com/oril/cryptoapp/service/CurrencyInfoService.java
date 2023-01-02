@@ -1,6 +1,5 @@
 package com.oril.cryptoapp.service;
 
-import com.oril.cryptoapp.entity.api.CurrencyInfo;
 import com.oril.cryptoapp.entity.response.CurrencyPriceRS;
 import jakarta.servlet.http.HttpServletResponse;
 
